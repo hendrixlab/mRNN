@@ -26,7 +26,7 @@ def usage():
     -t --test\tProportion of data to test on. (default=0.1)
     -l --min_length\tminimum length sequence to train on (default=200)
     -L --max_length\tmaximum length sequence to train on (default=1000)
-    
+    -s --early_stopping\tNumber of epochs above minimum validation score before stopping
 ''')
     sys.exit()
 
@@ -40,7 +40,7 @@ The main loop. Parse input options, run training sequence.
     
 def main():
     # Options
-    opts, files = getopt.getopt(sys.argv[1:], "hvo:w:E:b:e:r:d:t:p:", ["help",
+    opts, files = getopt.getopt(sys.argv[1:], "hvo:w:E:b:e:r:d:t:l:L:s:", ["help",
                                                                        "output=",
                                                                        "weights=",
                                                                        "epochs=",
@@ -51,15 +51,18 @@ def main():
                                                                        "test=",
                                                                        "min_length=",
                                                                        "max_length=",
+							               "early_stopping="
                                                                    ])
-    if len(files) != 2:
+    if len(files) != 4:
         usage()
-        
     posFastaFile = files[0]
     negFastaFile = files[1]
+    posValFasta = files[2]
+    negValFasta = files[3]
     print "using positive file: ", posFastaFile
     print "using negative file: ", negFastaFile
- 
+    print "using positive validation file: ", posValFasta
+    print "using negative validation file: ", negValFasta
     # Defaults:
     parameters = {}
     parameters['output'] = None
@@ -75,7 +78,7 @@ def main():
     parameters['num_train'] = 10000
     parameters['epochs'] = 25
     parameters['save_freq'] = 1
-
+    parameters['early_stopping'] = None
     # loop over options:
     for option, argument in opts:
         if option == "-v":
@@ -102,6 +105,10 @@ def main():
             parameters['max_length'] = int(argument)
         elif option in ("-n", "--num_train"):
             parameters['num_train'] = int(argument)
+	elif option in ("-s", "--early_stopping"):
+	    if argument:
+		argument = int(argument)
+	    parameters['early_stopping'] = argument
         else:
             assert False, "unhandled option"
 
@@ -112,11 +119,15 @@ def main():
     print "Reading input files..."
     positives = fasta.load_fasta(posFastaFile,parameters['min_length'])
     negatives = fasta.load_fasta(negFastaFile,parameters['min_length'])
+    valpos = fasta.load_fasta(posValFasta,parameters['min_length'])
+    valneg = fasta.load_fasta(negValFasta,parameters['min_length'])
     train = positives,negatives
+    val = valpos, valneg
     print "Building new model..."
     mRNN = model.build_model(parameters['weights'],parameters['embedding_size'],parameters['recurrent_gate_size'],5,parameters['dropout'])
     print "Training model..."
-    mRNN = model.train_model(mRNN, train, parameters['epochs'], parameters['output'],parameters['max_length'],parameters['save_freq'])
+    mRNN = model.train_model(mRNN, train, val, parameters['epochs'], parameters['output'],parameters['max_length'],parameters['save_freq'],
+	parameters['early_stopping'])
     
 
 if __name__ == "__main__":
