@@ -40,7 +40,7 @@ The main loop. Parse input options, run training sequence.
     
 def main():
     # Options
-    opts, files = getopt.getopt(sys.argv[1:], "hvo:w:E:b:e:r:d:t:l:L:s:q", ["help",
+    opts, files = getopt.getopt(sys.argv[1:], "hvo:w:E:b:e:r:d:t:l:L:s:", ["help",
                                                                        "output=",
                                                                        "weights=",
                                                                        "epochs=",
