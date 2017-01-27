@@ -106,7 +106,7 @@ def main():
         elif option in ("-n", "--num_train"):
             parameters['num_train'] = int(argument)
 	elif option in ("-s", "--early_stopping"):
-	    if argument:
+	    if argument is not None:
 		argument = int(argument)
 	    parameters['early_stopping'] = argument
         else:
