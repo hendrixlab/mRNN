@@ -129,7 +129,7 @@ class RNN(oldRNN):
                         sensitivity.append(sens)
                         specificity.append(spec)
                         #early stopping
-                        if early_stopping:
+                        if early_stopping is not None:
                                 if val_loss <= min_val:
                                         min_val = val_loss
                                         #reset count
