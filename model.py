@@ -1,5 +1,5 @@
 import numpy as np
-from passage.utils import save, load
+from passage.utils import save
 from passage.layers import Embedding, GatedRecurrent, Dense, OneHot, LstmRecurrent, Generic
 from passage.models import RNN as oldRNN
 from passage.preprocessing import LenFilter, standardize_targets
@@ -10,12 +10,22 @@ from theano import function, tensor
 import theano.sandbox.cuda.basic_ops as sbcuda
 from time import time
 from fasta import tokenize_dna
+import cPickle
+
+def load(path):
+    from passage import layers
+    model = cPickle.load(open(path))
+    model_class = RNN
+    model['config']['layers'] = [getattr(layers, layer['layer'])(**layer['config']) for layer in model['config']['layers']]
+    model = model_class(**model['config'])
+    return model
 
 class RNN(oldRNN):
         def __init__(self, **kwargs):
                 self.emb = kwargs['embedding_size']
                 del kwargs['embedding_size']
                 oldRNN.__init__(self, **kwargs)
+		self.settings['embedding_size'] = self.emb
                 valY = tensor.dvector('valY')
                 Ypredict = tensor.dvector('Ypredict')
                 valcost = self.cost(valY, Ypredict)
