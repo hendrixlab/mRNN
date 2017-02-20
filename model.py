@@ -11,7 +11,7 @@ import theano.sandbox.cuda.basic_ops as sbcuda
 from time import time
 from fasta import tokenize_dna
 import cPickle
-
+from os.path import exists
 def load(path):
     from passage import layers
     model = cPickle.load(open(path))
@@ -107,6 +107,7 @@ class RNN(oldRNN):
                 stopping_count = 0
 
                 for e in range(n_epochs):
+			weights = []
                         epoch_costs = []
                         for xmb, ymb in self.iterator.iterXY(trX, trY):
                                 c = self._train(xmb, ymb)
@@ -118,6 +119,23 @@ class RNN(oldRNN):
                                         time_left = n_left/n_per_sec
                                         sys.stdout.write("\rEpoch %d Seen %d samples Avg cost %0.4f Time left %d seconds" % (e, n, np.mean(epoch_costs[-250:]), time_left))
                                         sys.stdout.flush()
+				weights.append('Epoch: {0} samples: {1} avg cost: {2}'.format(e, n, np.mean(epoch_costs[-250:]))) 
+				for layer in self.settings['layers']:
+					try:
+						w = layer['config']['weights']
+					except TypeError:
+						w = [p.get_value() for p in layer.params]
+					for p in w:			
+						weights.append(str(p))
+						if np.any(np.isnan(p)):
+							err_file = 'error_0.txt'
+							i = 1
+							while exists(err_file):
+								err_file = 'err_{0}.txt'.format(i)
+								i += 1
+							with open(err_file, 'w') as out:
+								out.write('\n'.join(weights))
+							raise Exception('NaN weights')
                         costs.extend(epoch_costs)
                         training_costs.append(np.mean(epoch_costs))
 			status = "Epoch %d Seen %d samples Avg cost %0.4f Time elapsed %d seconds" % (e, n, np.mean(epoch_costs[-250:]), time() - t)

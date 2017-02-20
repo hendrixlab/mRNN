@@ -1,5 +1,6 @@
 import fasta, preprocessing, model, evaluate
 import sys, os, getopt
+import inspect
 
 #########
 # USAGE #
@@ -125,6 +126,7 @@ def main():
     val = valpos, valneg
     print "Building new model..."
     mRNN = model.build_model(parameters['weights'],parameters['embedding_size'],parameters['recurrent_gate_size'],5,parameters['dropout'])
+    print inspect.getmodule(mRNN.__class__)
     print "Training model..."
     mRNN = model.train_model(mRNN, train, val, parameters['epochs'], parameters['output'],parameters['max_length'],parameters['save_freq'],
 	parameters['early_stopping'])
