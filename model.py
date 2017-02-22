@@ -60,10 +60,14 @@ class RNN(oldRNN):
                         maxlen = seqs[0][0]
                 batches.append(seqs)
                 return batches
-        def batch_predict(self, seqs):
+        def batch_predict(self, seqs, verbose = False):
                 preds = []
+		count = 0
                 for batch in self.batch_by_memory(seqs):
-                        p = self.predict([x[2] for x in batch])
+                        if verbose:
+				count += len(batch)
+				print 'Analyzing {0} of {1}'.format(count, len(seqs))
+			p = self.predict([x[2] for x in batch])
                         #predictions
                         p = [x[0] for x in p]
                         #indices
