@@ -1,6 +1,5 @@
 import fasta, preprocessing, model, evaluate
 import sys, os, argparse, re
-from cProfile import run
 
 '''Usage: mutation_analysis.py <fasta> <model weights file> <output file name>'''
 '''Options:
@@ -54,4 +53,4 @@ def main():
         
 
 if __name__ == "__main__":
-	run('main()')
+	main()
