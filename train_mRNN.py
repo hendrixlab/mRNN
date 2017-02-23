@@ -130,7 +130,7 @@ def main():
     print "Training model..."
     mRNN = model.train_model(mRNN, train, val, parameters['epochs'], parameters['output'],parameters['max_length'],parameters['save_freq'],
 	parameters['early_stopping'])
-    
+    return mRNN
 
 if __name__ == "__main__":
     main()

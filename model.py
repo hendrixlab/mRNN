@@ -101,7 +101,7 @@ class RNN(oldRNN):
                 t = time()
                 costs = []
                 valY = np.asarray(valY)
-                valcosts = []
+                self.valcosts = []
                 sensitivity = []
                 specificity = []
                 training_costs = []
@@ -157,7 +157,7 @@ class RNN(oldRNN):
                         print "Validation loss:", val_loss
                         print "Sensitivity:", [round(x, 4) for x in sens]
                         print "Specificity:", [round(x, 4) for x in spec]
-                        valcosts.append(val_loss)
+                        self.valcosts.append(val_loss)
                         sensitivity.append(sens)
                         specificity.append(spec)
                         #early stopping
@@ -169,11 +169,11 @@ class RNN(oldRNN):
                                         #keep track of the traning cost at the minimum validation loss
                                         min_train = training_costs[-1]
                                 elif training_costs[-1] < min_train:
-                                        #only increase counter if the latest training loss is below the traning loss at minimum validation loss
+                                        #only increase counter if the latest training loss is below the training loss at minimum validation loss
                                         stopping_count += 1
                                         if stopping_count >= early_stopping:
                                                 break                           
-                return training_costs, valcosts, sensitivity, specificity
+                return training_costs, self.valcosts, sensitivity, specificity
 
 
 def build_model(weights=None, embedding_size=128, recurrent_gate_size=256, n_features=5, dropout=0.1):
@@ -229,7 +229,7 @@ def train_model(model, train_data, val_data, epochs, save_name, max_length, save
     tokens, labels = zip(*all_data)
     valX, valY = zip(*all_val)
     # temp
-    model.fit(tokens, labels, valX, valY, n_epochs=epochs, path=save_name, snapshot_freq=save_freq, len_filter=LenFilter(max_len=max_length, percentile=100),
+    run_info = model.fit(tokens, labels, valX, valY, n_epochs=epochs, path=save_name, snapshot_freq=save_freq, len_filter=LenFilter(max_len=max_length, percentile=100),
 	early_stopping = early_stopping)
     return model
 
