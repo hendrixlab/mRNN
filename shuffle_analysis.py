@@ -1,3 +1,4 @@
+
 import fasta, preprocessing, model, evaluate
 import sys, os, argparse, re
 from scipy.special import logit
@@ -8,7 +9,8 @@ from numpy import mean, std
 '''Options:
 	-o	Overwrite output file (default: error if file already exists)
 	-e	Extract Ensembl transcript ID from fasta defline (default: use full defline)
-	-n 	Number of shuffles (default 10).'''
+	-n 	Number of shuffles (default 20)
+	-p	Name of file where plot of sequence length vs. Z-score will be written. (default: no plot).'''
 
 def main():
 
@@ -27,19 +29,21 @@ def main():
 		action = 'store_true')
 	parser.add_argument('-e', help = '''Use this option to write just the Ensembl transcript ID instead of 
 		the full defline.''', action = 'store_true')
-	parser.add_argument('-n', help = '''Number of times to shuffle each segment. Default 10.''', default = 10, type = int)
+	parser.add_argument('-n', help = '''Number of times to shuffle each segment. Default 20.''', default = 20, type = int)
+	parser.add_argument('-p', help = '''Name of file to write plot to. The plot is a matplotlib plot of z-score 
+				vs sequence length. The -o option also applies to this file.''')
 	args = parser.parse_args()
 
 	##########
 	## MAIN ##
 	##########
 
-	if not args.o and os.path.exists(args.output):
-		if args.s:
-			field1 = 'directory'
-		else: 
+	if not args.o:
+		if os.path.exists(args.output):
 			field1 = 'file'
-		raise Exception(args.output + ''' already exists! Please choose a different {0} name or use the -o option to overwrite. Use the command python {1} -h for more details.'''.format(field1, sys.argv[0]))
+			raise Exception(args.output + ''' already exists! Please choose a different {0} name or use the -o option to overwrite. Use the command python {1} -h for more details.'''.format(field1, sys.argv[0]))
+		if os.path.exists(args.p):
+			raise Exception(args.p + ''' already exists! Please choose a different {0} name or use the -o option to overwrite. Use the command python {1} -h for more details.'''.format(field1, sys.argv[0]))
 	orig_dir = os.getcwd()
 	if args.e: 
 		transpat = re.compile('ENST\d*.\d*')
@@ -112,6 +116,9 @@ def main():
 	
 	with open(args.output, 'w') as out:
 		out.write('\n'.join(lines))
+
+	if args.p:
+		plot_zscores(Zscores, seq_lens, args.p)	
 		
 def shuffle_seq(seq, shuffle_num):
 	if len(seq) == 0:
@@ -125,6 +132,24 @@ def shuffle_seq(seq, shuffle_num):
 
 def z_score(X, sample):
 	return (X - mean(sample)) / std(sample)
+	
+def plot_zscores(Zscores, lens, figname):
+	import matplotlib
+	matplotlib.use('agg')
+	from matplotlib import pyplot as plt
+	
+	names, utr5, cds, utr3 = zip(*Zscores)
+	scores = [utr5, cds, utr3]
+	colors = ['green', 'blue', 'red']
+	labels = ["5' UTR", "CDS", "3' UTR"]
+	lens = zip(*lens)
+	for score, length, color, label in zip(scores, lens, colors, labels):
+		plt.scatter(length, score, color = color, label = label)
+	plt.legend()
+	plt.ylabel('Z-score')
+	plt.xlabel('Sequence length')
+	plt.savefig(figname)	
+	
 	
 if __name__ == "__main__":
 	main()
