@@ -42,7 +42,7 @@ def main():
 		if os.path.exists(args.output):
 			field1 = 'file'
 			raise Exception(args.output + ''' already exists! Please choose a different {0} name or use the -o option to overwrite. Use the command python {1} -h for more details.'''.format(field1, sys.argv[0]))
-		if os.path.exists(args.p):
+		if args.p and os.path.exists(args.p):
 			raise Exception(args.p + ''' already exists! Please choose a different {0} name or use the -o option to overwrite. Use the command python {1} -h for more details.'''.format(field1, sys.argv[0]))
 	orig_dir = os.getcwd()
 	if args.e: 
