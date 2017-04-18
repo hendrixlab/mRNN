@@ -109,7 +109,8 @@ def main():
 			except IndexError:
 				pass
 		Zscores.append([tmp[key] for key in ['name', 'utr5', 'cds', 'utr3']])
-	lines = ["transcript\t5' UTR Z-score\tCDS Z-score\t3' UTR Z-score\t5' UTR length\tCDS length\t3' UTR length"]
+	comments = '#fasta: {0}, weights: {1}, number of shuffles: {2}'.format(args.fasta, args.weights, args.n)
+	lines = [comments, "transcript\t5' UTR Z-score\tCDS Z-score\t3' UTR Z-score\t5' UTR length\tCDS length\t3' UTR length"]
 	for z, lens in zip(Zscores, seq_lens):
 		line = map(str, z + lens)
 		lines.append('\t'.join(line))		
