@@ -6,6 +6,29 @@ import random
 import sys
 
 '''
+evaluate_sequences
+
+Inputs:
+   model - a pre-trained model RNN built from model.py
+   test_data - a list of sequence data read in by fasta.py
+   output - the name of an output file to print to.
+   max_batch_size - the maximum size of a batch
+
+Returns:
+   Nothing. Prints a file of predicted probabilities and scores
+'''
+
+def evaluate_sequences(model, sequences, output, max_batch_size=16):
+    print "Preparing batches for prediction..."
+    batches = prepare_batches(sequences,max_batch_size)
+    predictions = get_batch_predictions(model, batches)
+    OUT = open(output,'w')
+    for result in predictions:
+        name,prob,score = result
+        OUT.write("%s\t%f\t%f\n" % (name,prob,score))
+    OUT.close()
+
+'''
 evaluate_model
 
 Inputs:
@@ -44,6 +67,41 @@ def prepare_batches(data,batch_size):
         for b in range(0, len(datas), batch_size):
             batches.append(datas[b:b+batch_size])
     return batches
+
+
+"""
+batch_predict
+
+Inputs:
+  model - Model to use for prediction
+  data - Data set to generate predictions for
+  batch_size - Size of each prediction batch
+
+Note: 
+  Each batch of data in batches is a list of tuples of dna, name
+
+Returns:
+    An array of the counts of negative, positive predictions
+"""
+
+def get_batch_predictions(model, batches):
+    from scipy.special import logit
+    print "Making predictions..."
+    results = []
+    for b in batches:
+        dna, name = zip(*b)
+        r =  model.predict(dna)
+        probs = []
+        scores = []
+        for pred in r:
+            prob = pred[0]
+            probs.append(prob)
+            score = logit(prob)
+            scores.append(score)
+        batch_results = zip(name,probs,scores)
+        results.extend(batch_results)
+    return results
+
 
 """
 batch_predict
