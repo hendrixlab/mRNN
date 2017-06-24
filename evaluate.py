@@ -2,15 +2,15 @@ import numpy as np
 from passage.utils import save, load
 from passage.layers import Embedding, GatedRecurrent, Dense, OneHot, LstmRecurrent, Generic
 from passage.models import RNN
-import random
-import sys
+import sys, random
+from scipy.special import logit
 
 '''
 evaluate_sequences
 
 Inputs:
    model - a pre-trained model RNN built from model.py
-   test_data - a list of sequence data read in by fasta.py
+   sequences - a list of sequence data read in by fasta.py
    output - the name of an output file to print to.
    max_batch_size - the maximum size of a batch
 
@@ -25,8 +25,34 @@ def evaluate_sequences(model, sequences, output, max_batch_size=16):
     OUT = open(output,'w')
     for result in predictions:
         name,prob,score = result
-        OUT.write("%s\t%f\t%f\n" % (name,prob,score))
+        OUT.write("%s\t%f\t%f\n" % (name.strip(),prob,score))
     OUT.close()
+
+
+'''
+ensemble_evaluate_sequences
+
+Inputs:
+   models - a list of pre-trained models mRNN built from model.py
+   sequences - a list of sequence data read in by fasta.py
+   output - the name of an output file to print to.
+   max_batch_size - the maximum size of a batch
+
+Returns:
+   Nothing. Prints a file of predicted probabilities and scores
+'''
+
+def ensemble_evaluate_sequences(models, sequences, output, max_batch_size=16):
+    print "Preparing batches for prediction..."
+    batches = prepare_batches(sequences,max_batch_size)
+    predictions = get_batch_ensemble_predictions(models, batches)
+    OUT = open(output,'w')
+    for result in predictions:
+        name,prob,score = result
+        OUT.write("%s\t%f\t%f\n" % (name.strip(),prob,score))
+    OUT.close()
+
+
 
 '''
 evaluate_model
@@ -70,7 +96,7 @@ def prepare_batches(data,batch_size):
 
 
 """
-batch_predict
+get_batch_predictions
 
 Inputs:
   model - Model to use for prediction
@@ -85,7 +111,6 @@ Returns:
 """
 
 def get_batch_predictions(model, batches):
-    from scipy.special import logit
     print "Making predictions..."
     results = []
     for b in batches:
@@ -102,6 +127,45 @@ def get_batch_predictions(model, batches):
         results.extend(batch_results)
     return results
 
+
+"""
+get_batch_ensemble_predictions
+
+Inputs:
+  models - a list of models to use for prediction
+  batches - pre-batched  sequences 
+
+Note: 
+  Each batch of data in batches is a list of tuples of dna, name
+
+Returns:
+    An array of the counts of negative, positive predictions
+"""
+
+def get_batch_ensemble_predictions(models, batches):
+    results = [] 
+    print "Making predictions..."
+    for b in batches:
+        dna, name = zip(*b)
+        probs = []
+        scores = []
+        multi_preds = []
+        for model in models:
+            preds = []
+            r =  model.predict(dna)
+            for pred in r:
+                preds.append(pred[0])
+            multi_preds.append(preds)
+        pred_list = zip(*multi_preds)
+        for p in pred_list:
+            predictions = list(p)
+            prob = sum(predictions)/len(predictions)
+            probs.append(prob)
+            score = logit(prob)
+            scores.append(score)
+        batch_results = zip(name,probs,scores)
+        results.extend(batch_results)
+    return results
 
 """
 batch_predict
@@ -256,5 +320,6 @@ def process_results(conf_mat,parameters):
     F.write("%s\tACC\t%.4f\n" % (parameters['weights'],acc))
     F.write("%s\tSPEC\t%.4f\n" % (parameters['weights'],spec))
     F.write("%s\tSENS\t%.4f\n" % (parameters['weights'],sens))
+    F.write("%d\t%d\n%d\t%d\n" % (TN,FP,FN,TP))
     F.close()
     return acc
