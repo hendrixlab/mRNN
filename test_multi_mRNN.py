@@ -141,6 +141,7 @@ def main():
     F.write("%s\tACC\t%.4f\n" % (parameters['weights'],acc))
     F.write("%s\tSPEC\t%.4f\n" % (parameters['weights'],spec))
     F.write("%s\tSENS\t%.4f\n" % (parameters['weights'],sens))
+    F.write("%d\t%d\n%d\t%d\n" % (TN,FP,FN,TP))
     F.close()
 
 if __name__ == "__main__":
