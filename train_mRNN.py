@@ -12,7 +12,7 @@ Prints the usage statement and all options
     
 def usage():
     script = os.path.basename(__file__)
-    print "\n\nUsage:  " + script + " [options] <positive fasta> <negative fasta>"
+    print "\n\nUsage:  " + script + " [options] <positive fasta> <negative fasta> <positive validation fasta> <negative validation fasta>"
     print('''          
           Options:
           
@@ -21,9 +21,9 @@ def usage():
     -w --weights\tpkl file of the model/model weights.
     -E --epochs\tNumber of epochs to train on.(default=50)
     -b --batch_size\tbatch size for testing (default=64)
-    -e --embedding_size\tNumber of dimensions in embedding (default=256)
-    -r --recurrent_gate_size\tSize of recurrent gate (default=512)
-    -d --dropout\tThe dropout probability p_dropout (default=0.4)
+    -e --embedding_size\tNumber of dimensions in embedding (default=128)
+    -r --recurrent_gate_size\tSize of recurrent gate (default=256)
+    -d --dropout\tThe dropout probability p_dropout (default=0.5)
     -t --test\tProportion of data to test on. (default=0.1)
     -l --min_length\tminimum length sequence to train on (default=200)
     -L --max_length\tmaximum length sequence to train on (default=1000)
@@ -72,7 +72,7 @@ def main():
     parameters['batch_size'] = 16
     parameters['embedding_size'] = 128
     parameters['recurrent_gate_size'] = 256
-    parameters['dropout'] = 0.1
+    parameters['dropout'] = 0.5
     parameters['test'] = 0.1
     parameters['min_length'] = 200
     parameters['max_length'] = 1000
@@ -96,6 +96,8 @@ def main():
             parameters['batch_size'] = int(argument)
         elif option in ("-e", "--embedding_size"):
             parameters['embedding_size'] = int(argument)
+        elif option in ("-r", "--recurrent_gate_size"):
+            parameters['recurrent_gate_size'] = int(argument)
         elif option in ("-d", "--dropout"):
             parameters['dropout'] = float(argument)
         elif option in ("-t", "--test"):
