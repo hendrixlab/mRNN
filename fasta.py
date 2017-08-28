@@ -1,3 +1,4 @@
+import re
 
 """
 fasta 
@@ -22,8 +23,8 @@ def load_fasta(filename, min_size):
                 if seq != "":
                     dna = tokenize_dna(seq)
                     seqs.append((dna, name))
-                seq = ""
-                name = line
+                seq = ""                
+                name = re.sub('>','',line.strip())
             else:
                 seq += line.strip()
     if seq != "":
