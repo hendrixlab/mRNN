@@ -30,6 +30,7 @@ mRNN_ensemble.py - Basic prediction of coding probability for a set of input seq
 2. _Further Analysis_
 
 mutation_analysis.py - For the provided input sequence, perform a mutation analysis involving every possible point-mutation on the input sequence, and computing its corresponding score change. 
+
 pair_mutation_analysis.py - For a provided input sequence, computer all possible pairs of mutation i,a,j,b where position i is changed to a and position j is changed to b. 
 
 shuffle_analysis.py - For the provided input sequences, shuffle each of them and report the scores of the shuffled sequence to the unaltered sequence. 
@@ -41,6 +42,9 @@ truncation_analysis.py - Coding score trajectory. Compute the mRNN coding probab
 These modules aren't called directly, but involved in basic function of mRNN
 
 fasta.py - input reading FASTA files
+
 model.py - building the mRNN model
+
 evaluate.py - Computing accuracy, batch testing
+
 preprocessing.py - Utilities for various preprocessing
