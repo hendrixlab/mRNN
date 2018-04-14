@@ -1,16 +1,15 @@
-
 import fasta, preprocessing, model, evaluate
 import sys, os, argparse, re
 from scipy.special import logit
 from random import shuffle
-from numpy import mean, std
+from numpy import mean, std, arange
 
 '''Usage: truncation_analysis.py <fasta> <model weights file> <output file name>'''
 '''Options:
 	-o	Overwrite output file (default: error if file already exists)
 	-e	Extract Ensembl transcript ID from fasta defline (default: use full defline)
 	-n 	Number of shuffles (default 20)
-	-p	Name of file where plot of sequence length vs. Z-score will be written. (default: no plot).'''
+	-p	base of the files where plots will be written. (default: no plot).'''
 
 def main():
 
@@ -30,7 +29,7 @@ def main():
 	parser.add_argument('-e', help = '''Use this option to write just the Ensembl transcript ID instead of 
 		the full defline.''', action = 'store_true')
 	parser.add_argument('-n', help = '''Number of times to shuffle each segment. Default 20.''', default = 20, type = int)
-	parser.add_argument('-p', help = '''Name of file to write plot to. The plot is a matplotlib plot of z-score 
+	parser.add_argument('-p', help = '''Base of filenames to plot to. The plot is a matplotlib plot of z-score 
 				vs sequence length. The -o option also applies to this file.''')
 	args = parser.parse_args()
 
@@ -119,7 +118,8 @@ def main():
 		out.write('\n'.join(lines))
 
 	if args.p:
-		plot_zscores(Zscores, seq_lens, args.p)	
+		plot_zscore_scatter(Zscores, seq_lens, args.p) 
+		plot_zscore_histogram(Zscores, seq_lens, args.p)	
 		
 def shuffle_seq(seq, shuffle_num):
 	if len(seq) == 0:
@@ -134,22 +134,53 @@ def shuffle_seq(seq, shuffle_num):
 def z_score(X, sample):
 	return (X - mean(sample)) / std(sample)
 	
-def plot_zscores(Zscores, lens, figname):
+def plot_zscore_scatter(Zscores, lens, figbase):
 	import matplotlib
 	matplotlib.use('agg')
 	from matplotlib import pyplot as plt
 	
 	names, utr5, cds, utr3 = zip(*Zscores)
 	scores = [utr5, cds, utr3]
-	colors = ['green', 'blue', 'red']
+	#colors = ['#D7191C', '#FDAE61', '#2C7BB6']
+        colors = ['red', 'green', 'blue']
+        labels = ["5' UTR", "CDS", "3' UTR"]
+	lens = zip(*lens)
+	for score, length, color, label in zip(scores, lens, colors, labels):
+		plt.scatter(length, score, s = 3, color = color, label = label, alpha = 0.5)
+	plt.legend(loc="upper left", scatterpoints=1)
+        plt.xscale('log')
+        plt.yscale('symlog')
+	plt.ylabel('Z-score')
+	plt.xlabel('Length of shuffled region (nt)')
+	plt.savefig(figbase + "_scatter.svg")	
+        plt.clf()
+
+def plot_zscore_histogram(Zscores, lens, figbase):
+	import matplotlib
+	matplotlib.use('agg')
+	from matplotlib import pyplot as plt
+	
+	names, utr5, cds, utr3 = zip(*Zscores)
+	scores = [utr5, cds, utr3]
+        allScores = utr5 + cds + utr3
+        binWidth = 0.5
+        print utr5
+        print cds
+        print utr3
+        print allScores
+        print min(allScores)
+        print max(allScores)
+        bins = arange(min(s for s in allScores if s is not None),max(s for s in allScores if s is not None),binWidth)
+	#colors = ['#D7191C', '#FDAE61', '#2C7BB6']
+        colors = ['red', 'green', 'blue']
 	labels = ["5' UTR", "CDS", "3' UTR"]
 	lens = zip(*lens)
 	for score, length, color, label in zip(scores, lens, colors, labels):
-		plt.scatter(length, score, color = color, label = label)
+		plt.hist(score, bins=bins, normed = True, color = color, label = label, linewidth = 0, alpha=0.5)
 	plt.legend()
-	plt.ylabel('Z-score')
-	plt.xlabel('Sequence length')
-	plt.savefig(figname)	
+	plt.xlabel('Z-score')
+	plt.ylabel('Probability Density')
+	plt.savefig(figbase + "_histogram.svg")	
 	
 	
 if __name__ == "__main__":
