@@ -7,6 +7,7 @@ You can obtain mRNN through github:
 
 git clone https://github.com/hendrixlab/mRNN.git
 
+
 _mRNN: Included Files_
 
 1. _Testing and Training_
@@ -16,7 +17,8 @@ _mRNN: Included Files_
    Example: 
    	    $ python mRNN/train_mRNN.py -e 128 -r 32 -d 0.4 -o mRNN.16K.da1.1 -s 3 -E 4 mRNAs.train16K.da1.fa lncRNAs.train16K.da1.fa mRNAs.valid500.fa lncRNAs.valid500.fa > epochs.mRNN.16K.da1.1.txt
 
-   test_mRNN.py
+
+   test_mRNN.py - test the accuracy of a known set of mRNAs and lncRNAs.
 
    Example: 
    	    $ python mRNN/test_mRNN.py -w w14u3.pkl -f test mRNAs.test500.fasta lncRNAs.test500.fasta
@@ -51,3 +53,24 @@ These modules aren't called directly, but involved in basic function of mRNN
       evaluate.py - Computing accuracy, batch testing
 
       preprocessing.py - Utilities for various preprocessing
+
+_How to get data from mRNN project_
+
+The data used to train mRNN and produce the weights provided in the weights directory, you can download them from the following location:
+
+https://osf.io/4htpy/
+
+262K	lncRNAs.CHALLENGE.fa
+243K	lncRNAs.CHALLENGE500.fa
+23M	lncRNAs.MOUSETEST.fa
+977K	lncRNAs.TEST.fa
+527K	lncRNAs.TEST500.fa
+28M	lncRNAs.TRAIN.fa
+11M	lncRNAs.train16K.fa
+981K	mRNAs.CHALLENGE.fa
+708K	mRNAs.CHALLENGE500.fa
+146M	mRNAs.MOUSETEST.fa
+5.0M	mRNAs.TEST.fa
+1.2M	mRNAs.TEST500.fa
+191M	mRNAs.TRAIN.fa
+12M	mRNAs.train16K.fa
