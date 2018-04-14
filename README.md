@@ -61,16 +61,29 @@ The data used to train mRNN and produce the weights provided in the weights dire
 https://osf.io/4htpy/
 
 262K	lncRNAs.CHALLENGE.fa
+
 243K	lncRNAs.CHALLENGE500.fa
+
 23M	lncRNAs.MOUSETEST.fa
+
 977K	lncRNAs.TEST.fa
+
 527K	lncRNAs.TEST500.fa
+
 28M	lncRNAs.TRAIN.fa
+
 11M	lncRNAs.train16K.fa
+
 981K	mRNAs.CHALLENGE.fa
+
 708K	mRNAs.CHALLENGE500.fa
+
 146M	mRNAs.MOUSETEST.fa
+
 5.0M	mRNAs.TEST.fa
+
 1.2M	mRNAs.TEST500.fa
+
 191M	mRNAs.TRAIN.fa
+
 12M	mRNAs.train16K.fa
