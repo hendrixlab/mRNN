@@ -55,7 +55,7 @@ class RNN(oldRNN):
         def batch_by_memory(self, seqs):
                 #gpu_mem = sbcuda.cuda_ndarray.cuda_ndarray.mem_info()[0]
                 #max_size = (gpu_mem / self.emb) / 64
-                max_size = 256
+                max_size = 320000
                 lengths = [len(seq) for seq in seqs]
                 seqs = zip(lengths, range(len(seqs)), seqs)
                 #separate into batches so that memory is not exceeded
