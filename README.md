@@ -8,6 +8,22 @@ You can obtain mRNN through github:
 git clone https://github.com/hendrixlab/mRNN.git
 
 
+Note: This code requires the module "Passage" available at: https://github.com/IndicoDataSolutions/Passage
+However, it is tested to work properly on an early version that can be obtained by:
+
+git clone https://github.com/IndicoDataSolutions/Passage.git
+cd Passage/
+git checkout 4b8be6dc4d17ccc78a21abc82afb2d0f72c04b91
+
+Also required are:
+
+numpy
+theano
+cPickle
+sys
+os
+math
+
 _mRNN: Included Files_
 
 1. _Testing and Training_
