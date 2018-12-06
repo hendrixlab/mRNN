@@ -1,9 +1,8 @@
-import numpy as np
-from passage.utils import save, load
-from passage.layers import Embedding, GatedRecurrent, Dense, OneHot, LstmRecurrent, Generic
-from passage.models import RNN
-import sys, random
-from scipy.special import logit
+import os
+from math import log
+
+def logit(p):
+    return log(p/(1-p))
 
 '''
 evaluate_sequences
@@ -312,10 +311,12 @@ def process_results(conf_mat,parameters):
     acc = (TP+TN)/(TP+TN+FP+FN)
     sens = TP/(TP+FN)
     spec = TN/(TN+FP)
-    outFile = parameters['weights'] + ".acc.txt"
+    
+    baseName = os.path.basename(parameters['weights'])
+    outFile = baseName + "_acc.txt"
     if parameters['file_label']:
-        outFile = parameters['weights'] + "." + parameters['file_label'] + ".acc.txt"
-        
+        outFile = baseName+ "_" + parameters['file_label'] + "_acc.txt"
+    print "Writing accuracy information to " + outFile
     F = open(outFile,'w')
     F.write("%s\tACC\t%.4f\n" % (parameters['weights'],acc))
     F.write("%s\tSPEC\t%.4f\n" % (parameters['weights'],spec))
