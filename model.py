@@ -1,22 +1,31 @@
 import numpy as np
 from passage.utils import save
-from passage.layers import Embedding, GatedRecurrent, Dense, OneHot, LstmRecurrent, Generic
+from passage.layers import Embedding, GatedRecurrent, Dense, OneHot
 from passage.models import RNN as oldRNN
 from passage.preprocessing import LenFilter, standardize_targets
 from passage.updates import Adadelta
 import random
 import sys
 from theano import function, tensor
-import theano.sandbox.cuda.basic_ops as sbcuda
+#import theano.sandbox.cuda.basic_ops as sbcuda
 from time import time
 from fasta import tokenize_dna
 import cPickle
 from os.path import exists
+
 def load(path):
     from passage import layers
     model = cPickle.load(open(path))
     model_class = RNN
     model['config']['layers'] = [getattr(layers, layer['layer'])(**layer['config']) for layer in model['config']['layers']]
+    '''
+    results = []
+    for layer in model['config']['layers']:
+        print(layer)
+        result = getattr(layers, layer['layer'])(**layer['config'])
+        results.append(result)
+        model['config']['layers'] = result
+    '''
     model = model_class(**model['config'])
     return model
 
@@ -44,8 +53,9 @@ class RNN(oldRNN):
                 return loss, sens, spec
         
         def batch_by_memory(self, seqs):
-                gpu_mem = sbcuda.cuda_ndarray.cuda_ndarray.mem_info()[0]
-                max_size = (gpu_mem / self.emb) / 64
+                #gpu_mem = sbcuda.cuda_ndarray.cuda_ndarray.mem_info()[0]
+                #max_size = (gpu_mem / self.emb) / 64
+                max_size = 256
                 lengths = [len(seq) for seq in seqs]
                 seqs = zip(lengths, range(len(seqs)), seqs)
                 #separate into batches so that memory is not exceeded
@@ -199,7 +209,7 @@ def build_model(weights=None, embedding_size=128, recurrent_gate_size=256, n_fea
         Dense(size=1, activation='sigmoid', p_drop=dropout)
     ]
     args = {'layers' : model_layers, 'cost' : 'BinaryCrossEntropy', 'verbose' : 2, 'updater': Adadelta(lr=0.5),
-	'embedding_size' : embedding_size}
+            'embedding_size' : embedding_size}
     model = RNN(**args)
     if weights: #Just load the provided model instead, I guess?
         print "Loading previously created weights file: ", weights
